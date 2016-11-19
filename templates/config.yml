@@ -1,0 +1,11 @@
+---
+client:
+  hosts:
+    - {{ELASTICSEARCH_HOST}}
+  port: {{ELASTICSEARCH_PORT}}
+  master_only: {{MASTER_ONLY}}
+  use_ssl: {{SSL}}
+
+logging:
+  loglevel: INFO
+  logformat: json

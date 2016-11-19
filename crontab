@@ -1,0 +1,2 @@
+# Write out status every five minutes to ensure curator is working as expected
+*/5 * * * * root echo "curator running on $(hostname)" >> /var/log/cron.log 2>&1
