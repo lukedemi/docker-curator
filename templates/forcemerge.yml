@@ -1,0 +1,29 @@
+actions:
+  1:
+    action: forcemerge
+    description: >-
+      forceMerge indices between {{FORCEMERGE_FROM_DAY}} and {{FORCEMERGE_TO_DAY}} days old
+      to {{FORCEMERGE_SEGMENTS}} segments per shard.  Delay {{FORCEMERGE_DELAY}} seconds between each
+      forceMerge operation to allow the cluster to quiesce.
+      This action will ignore indices already forceMerged to the same or fewer
+      number of segments per shard, so the 'forcemerged' filter is unneeded.
+    options:
+      max_num_segments: {{FORCEMERGE_SEGMENTS}}
+      delay: {{FORCEMERGE_DELAY}}
+      timeout_override: {{FORCEMERGE_TIMEOUT}}
+      continue_if_exception: True
+    filters:
+    - filtertype: age
+      source: name
+      direction: older
+      timestring: '{{TIME_STRING}}'
+      unit: days
+      unit_count: {{FORCEMERGE_FROM_DAY}}
+      exclude:
+    - filtertype: age
+      source: name
+      direction: younger
+      timestring: '{{TIME_STRING}}'
+      unit: days
+      unit_count: {{FORCEMERGE_TO_DAY}}
+      exclude:

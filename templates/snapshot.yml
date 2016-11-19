@@ -1,0 +1,38 @@
+actions:
+  1:
+    action: snapshot
+    description: >-
+      Snapshot {{INDEX_PREFIX}} prefixed indices beteween {{SNAPSHOT_FROM_DAY}} and {{SNAPSHOT_TO_DAY}} days old (based on index name)
+      with the default snapshot name pattern of 'curator-%Y%m%d%H%M%S'.
+      Wait for the snapshot to complete.  Do not skip the repository filesystem access check.
+    options:
+      repository: {{SNAPSHOT_REPOSITORY}}
+      # Leaving name blank will result in the default 'curator-%Y%m%d%H%M%S'
+      name:
+      ignore_empty_list: True
+      ignore_unavailable: False
+      include_global_state: True
+      partial: False
+      wait_for_completion: True
+      skip_repo_fs_check: False
+      timeout_override: {{SNAPSHOT_TIMEOUT}}
+      continue_if_exception: True
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: {{INDEX_PREFIX}}
+      exclude:
+    - filtertype: age
+      source: name
+      direction: older
+      timestring: '{{TIME_STRING}}'
+      unit: days
+      unit_count: {{SNAPSHOT_FROM_DAY}}
+      exclude:
+    - filtertype: age
+      source: name
+      direction: younger
+      timestring: '{{TIME_STRING}}'
+      unit: days
+      unit_count: {{SNAPSHOT_TO_DAY}}
+      exclude:
