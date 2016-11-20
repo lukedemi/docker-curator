@@ -1,28 +1,54 @@
 ## Overview
 
-Run Curator on a schedule in a Docker container. 
+I had enough difficulty trying to run cron and Curator 4.X together in a Docker container that I decided to release something for people to either run themselves or use as a jumping off point for their own implementation.
 
-I had enough difficulty trying to run cron and curator 4.0 together in a docker container that I decided it made sense to release something general for those who might be put in a similar situation.
-
-Basic limitations are that you can only perform actions on one index and only perform one of each of the below actions on that index. I do think this container should work fine for most simple ELK configurations with just the default values.
+The main limitation of this container is that you can only perform one action per index and only close, delete, snapshot, and forcemerge are supported. I do think this container should work fine for most simple ELK configurations with just the default values.
 
 ## Usage Quick Start
 
-Below is the minimal configuration necessary to run delete, close, snapshot, and forcemerge on localhost:9200 once a day on logastash prefixed indices. See Parameters below for all available options to fine tune the instance.
+Below is the minimal configuration necessary to run delete, close, snapshot, and forcemerge on localhost:9200 once a day on logstash prefixed indices. See Parameters below for all available options to fine tune the different actions
 
 ```
 docker run -d \
-  -e DELETE_HOUR=7 \
   -e CLOSE_HOUR=8 \
+  -e DELETE_HOUR=7 \
   -e SNAPSHOT_HOUR=9 \
+  -e SNAPSHOT_REPOSITORY=curator-s3 \
   -e FORCEMERGE_HOUR=10 \
-  curator
+  lukedemi/curator
+```
+
+A way to use this container on multiple indices is to just run two. Just be careful to avoid forcemerging two potentially large indices at the same time. Here's a configuration example that closely matches a past production environment.
+
+```
+docker run -d \
+  --name logstash
+  -e INDEX_PREFIX=logstash \
+  -e CLOSE_DAY=30 \
+  -e CLOSE_HOUR=8 \
+  -e DELETE_DAY=31 \
+  -e DELETE_HOUR=7 \
+  -e SNAPSHOT_HOUR=9 \
+  -e SNAPSHOT_REPOSITORY=curator-s3 \
+  -e FORCEMERGE_HOUR=10 \
+  -e FORCEMERGE_TIMEOUT=10800 \
+  lukedemi/curator
+
+docker run -d \
+  --name kinesis \
+  -e INDEX_PREFIX=kinesis \
+  -e CLOSE_DAY=7 \
+  -e CLOSE_HOUR=8 \
+  -e DELETE_DAY=8 \
+  -e DELETE_HOUR=7 \
+  -e SNAPSHOT_HOUR=9 \
+  -e SNAPSHOT_REPOSITORY=curator-s3 \
+  lukedemi/curator
 ```
 
 ## Parameters
 
-Parameters of Curator configuration are set using environment variables
-when running the container (`docker run -e VAR=value`). See below for those parameters and their default values.
+Curator configuration is set using environment variables when running the container (`docker run -e VAR=value`). See below for those parameters and their default values.
 
 ### Global Configuration
 
@@ -71,9 +97,9 @@ when running the container (`docker run -e VAR=value`). See below for those para
 - `SNAPSHOT_TO_DAY=7`
  
   Curator will snapshot indices with a name younger than this integer based on TIME_STRING pattern.
-- `TIMEOUT=3600`
+- `SNAPSHOT_TIMEOUT=3600`
 
-### Snapshot
+### Force Merge
 
 - `FORCEMERGE_HOUR=...`
  
@@ -88,4 +114,4 @@ when running the container (`docker run -e VAR=value`). See below for those para
 - `FORCEMERGE_TO_DAY=7`
  
   Indices with a name older than this integer will be force merged.
-- `TIMEOUT=3600`
+- `FORCEMERGE_TIMEOUT=3600`
