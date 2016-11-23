@@ -1,15 +1,21 @@
-FROM ubuntu:14.04
+FROM alpine:3.4
 
-RUN apt-get update && \
-    apt-get install -y python-pip cron
+ARG CURATOR_VERSION=4.2.1
 
-ENV CURATOR_VERSION 4.2.1
-RUN pip install --quiet elasticsearch-curator==${CURATOR_VERSION}
+RUN \
+  apk add --no-cache --update \
+    bash \
+    python \
+    py-pip \
+    sed \
+    && \
+  pip install --no-cache-dir \
+    elasticsearch-curator==${CURATOR_VERSION} \
+    && \
+  mkdir /actions /config
 
-RUN mkdir /actions /config
-ADD crontab /etc/crontab
-ADD templates/* /templates/
+COPY crontab /var/spool/cron/crontabs/root
+COPY templates/* /templates/
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-ADD run.sh /usr/bin/run.sh
-
-ENTRYPOINT "/usr/bin/run.sh"
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

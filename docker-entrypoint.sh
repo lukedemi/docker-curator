@@ -8,7 +8,7 @@ if [ -n "$CLOSE_HOUR" ]; then
   sed 's/{{ACTION}}/close/g' |
   sed 's/{{HOUR}}/'"${CLOSE_HOUR:-8}"'/g' |
   sed 's/{{MINUTE}}/'"${CLOSE_MINUTE:-0}"'/g' |
-  cat >> /etc/crontab
+  cat >> /var/spool/cron/crontabs/root
 
   cat /templates/close.yml |
   sed 's/{{CLOSE_DAY}}/'"${CLOSE_DAY:-7}"'/g' |
@@ -20,7 +20,7 @@ if [ -n "$DELETE_HOUR" ]; then
   sed 's/{{ACTION}}/delete/g' |
   sed 's/{{HOUR}}/'"${DELETE_HOUR:-9}"'/g' |
   sed 's/{{MINUTE}}/'"${DELETE_MINUTE:-0}"'/g' |
-  cat >> /etc/crontab
+  cat >> /var/spool/cron/crontabs/root
 
   cat /templates/delete.yml |
   sed 's/{{DELETE_DAY}}/'"${DELETE_DAY:-8}"'/g' |
@@ -32,7 +32,7 @@ if [ -n "$SNAPSHOT_HOUR" ] && [ -n "$SNAPSHOT_REPOSITORY" ]; then
   sed 's/{{ACTION}}/snapshot/g' |
   sed 's/{{HOUR}}/'"${SNAPSHOT_HOUR:-10}"'/g' |
   sed 's/{{MINUTE}}/'"${SNAPSHOT_MINUTE:-0}"'/g' |
-  cat >> /etc/crontab
+  cat >> /var/spool/cron/crontabs/root
 
   cat /templates/snapshot.yml |
   sed 's/{{SNAPSHOT_FROM_DAY}}/'"${SNAPSHOT_FROM_DAY:-2}"'/g' |
@@ -47,7 +47,7 @@ if [ -n "$FORCEMERGE_HOUR" ]; then
   sed 's/{{ACTION}}/forcemerge/g' |
   sed 's/{{HOUR}}/'"${FORCEMERGE_HOUR:-11}"'/g' |
   sed 's/{{MINUTE}}/'"${FORCEMERGE_MINUTE:-0}"'/g' |
-  cat >> /etc/crontab
+  cat >> /var/spool/cron/crontabs/root
 
   cat /templates/forcemerge.yml |
   sed 's/{{FORCEMERGE_DELAY}}/'"${FORCEMERGE_DELAY:-120}"'/g' |
@@ -65,8 +65,4 @@ sed 's/{{MASTER_ONLY}}/'"${MASTER_ONLY:-False}"'/g' |
 sed 's/{{SSL}}/'"${SSL:-False}"'/g' |
 cat > /config/config.yml
 
-touch /var/log/cron.log
-
-cron
-
-tail -qf /var/log/cron.log
+exec crond -l 2 -f
