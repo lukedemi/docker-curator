@@ -10,6 +10,6 @@ RUN mkdir /actions /config
 ADD crontab /etc/crontab
 ADD templates/* /templates/
 
-ADD run.sh /usr/bin/run.sh
+ADD docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
 
-ENTRYPOINT "/usr/bin/run.sh"
+ENTRYPOINT "/usr/bin/docker-entrypoint.sh"
