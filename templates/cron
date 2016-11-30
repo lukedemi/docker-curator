@@ -1,1 +1,1 @@
-0 {{HOUR}} * * * root /usr/local/bin/curator --config /config/config.yml /actions/{{ACTION}}.yml >> /var/log/cron.log 2>&1
+{{MINUTE}} {{HOUR}} * * * /usr/bin/curator --config /config/config.yml /actions/{{ACTION}}.yml >> /dev/stdout 2>&1
